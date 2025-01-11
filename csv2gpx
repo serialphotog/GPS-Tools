@@ -1,0 +1,140 @@
+#!/usr/bin/env python3
+
+import argparse
+import os
+import sys
+
+from Lib.CSVParser import CSVParser
+from Lib.CommandLine import prompt_user_for_yes_or_no
+from Lib.GPXWriter import GPXWriter
+from typing import Dict
+
+def _validate_command_line_args(args):
+    """
+    Validates all of the command line arguments.
+
+    :param args: The command line arguments to validate.
+
+    :returns: True if the arguments are valid, else returns False.
+    """
+    # Ensure we have all of the required arguments
+    if not args.csv_path:
+        print(f'You must supply an input CSV file.')
+        return False
+    if not args.gpx_path:
+        print(f'You must supply the output path for the resulting GPX file.')
+        return False
+
+    # Make sure the input CSV exists
+    if not os.path.isfile(args.csv_path):
+        print(f'Could not find the input CSV: {args.csv_path}')
+        return False
+
+    # Check if the output file already exists
+    if os.path.isfile(args.gpx_path):
+        overwrite = prompt_user_for_yes_or_no(f'Output GPX {args.gpx_path} ' \
+                                              'already exists. Overwrite it?',
+                                              'yes')
+        if overwrite:
+            print(f'Removing existing file: {args.gpx_path}')
+            os.remove(args.gpx_path)
+        else:
+            print(f'Output file exists. Aborting.')
+            return False
+
+    return True
+
+def process_column_mapping(column_mapping_string) -> Dict:
+    """
+    Processes the column mapping format string supplied as a command line 
+    argument.
+
+    :param column_mapping_string: The column mapping to use when parsing the
+                                  CSV file.
+
+    :returns: A dictionary containing the mapping of GPS point components to
+              column numbers.
+
+    :throws: ValueError if an invalid format string is encountered.
+    """
+    # Storage for the final mapping
+    column_mapping = {}
+
+    # Valid mapping components
+    valid_components = ['lat', 'lon', 'name', 'desc']
+
+    # Parse each part of the format string
+    format_parts = column_mapping_string.split(',')
+
+    # Ensure that we have the expected number of entries in the mapping
+    if not len(format_parts) == 4:
+        raise ValueError('Invalid column mapping format string encountered.')
+
+    for part in format_parts:
+        components = part.split(':')
+
+        # Each component should consist of a 1:1 mapping
+        if len(components) != 2:
+            raise ValueError('Invalid column mapping provided.')
+        
+        # Ensure that we have a valid mapping
+        component = components[0]
+        value = components[1]
+        if not component in valid_components:
+            raise ValueError(f'Invalid entry found in column mapping: {component}')
+        
+        if not value == 'skip':
+            # Ensure that this component maps to an integer
+            try:
+                value = int(value)
+            except ValueError as e:
+                raise ValueError(e)
+        else:
+            if component == 'lat' or component == 'lon':
+                raise ValueError('You cannot skp the lat or lon values')
+        
+        # Add the parsed mapping to the column mappings
+        column_mapping[component] = value
+
+    return column_mapping
+
+def main():
+    parser = argparse.ArgumentParser(description="A simple utility to convert CSV files to GPX files.")
+    parser.add_argument('--input', '-i', dest="csv_path", help="Path to the input CSV file.")
+    parser.add_argument('--output', '-o', dest="gpx_path", help="Path to write the resulting GPX file to.")
+    parser.add_argument('--format', '-f', dest="column_mapping", help="The column mapping to use when parsing the CSV file.")
+    parser.add_argument('--skip', '-s', dest="skip_first", action="store_true", help="Skips the first row of the CSV file.")
+    parser.add_argument('--verbose', '-v', dest="verbose", action="store_true", help="Enable verbose output.")
+    args = parser.parse_args()
+
+    # Validate the command line arguments
+    if not _validate_command_line_args(args=args):
+        sys.exit()
+
+    # Handle the column mapping format string, if supplied
+    if args.column_mapping: 
+        try:
+            column_mapping = process_column_mapping(args.column_mapping)
+        except ValueError as e:
+            print(e)
+            sys.exit()
+    else:
+        column_mapping = None
+    
+    # Parse the CSV file
+    csv_parser = CSVParser(csv_path = args.csv_path, 
+                           column_mapping= column_mapping,
+                           skip_first=args.skip_first,
+                           verbose=args.verbose)
+    total, errors = csv_parser.parse()
+    print(f'Successfully read {total} rows. {errors} rows had errors and were skipped.')
+
+    # Generate the output GPX file
+    gpx_writer = GPXWriter(gps_points= csv_parser.get_gps_points(),
+                            output_path= args.gpx_path,
+                            verbose= args.verbose)
+    total_waypoints = gpx_writer.generate()
+    print(f'Successfully generated GPX file with {total_waypoints} waypoints.')
+
+if __name__ == '__main__':
+    main()
