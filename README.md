@@ -14,7 +14,17 @@ A collection of various tools for working with GPX (and related) files.
 - `--skip`, `-s`: Tells the software to ignore the first line of the CSV file. This is useful for ignoring a header row that may be present in the CSV file.
 - `--verbose`, `-v`: Enables verbose output for the program.
 
-### CSV Column Mapping
+## gpx2csv
+
+`gpx2csv` is a simple command line utility that allows you to take a GPX file containing GPS waypoints and convert it into a CSV file containing the GPS data.
+
+### Command Line Options
+
+- `--input`, `-i`: **Required**. The path to the input GPX file.
+- `--output`, `-o`: **Required**. The path to the output CSV file.
+- `--format`, `-f`: Allows you to specify a custom column mapping to use when generating the CSV file. See the *CSV Column Mapping* section for mor information.
+
+## CSV Column Mapping
 
 By default, `csv2gpx` will use the following column mapping:
 
