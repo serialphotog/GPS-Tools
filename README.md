@@ -1,6 +1,9 @@
-# GPX Tools
+# GPS Tools
 
-A collection of various tools for working with GPX (and related) files.
+This repository contains a collection of command line tools for working with GPS data. Currently, this project consists of the following tools:
+
+- [csv2gpx](#csv2gpx): Allows you to convert a CSV file containing GPS data into a GPX file.
+- [gpx2csv](#gpx2csv): Allows you to convert a GPX file into a CSV file containing the GPS data.
 
 ## csv2gpx
 
@@ -10,7 +13,7 @@ A collection of various tools for working with GPX (and related) files.
 
 - `--input`, `-i`: **Required**. The path to the input CSV file.
 - `--output`, `-o`: **Required**. The path to the output GPX file that will be created.
-- `--format`, `-f`: Allows you to specify a custom column mapping to use when parsing the CSV file. See the *CSV Column Mapping* section for more information.
+- `--format`, `-f`: Allows you to specify a custom column mapping to use when parsing the CSV file. See the [CSV Column Mapping](#csv-column-mapping) section for more information.
 - `--skip`, `-s`: Tells the software to ignore the first line of the CSV file. This is useful for ignoring a header row that may be present in the CSV file.
 - `--verbose`, `-v`: Enables verbose output for the program.
 
@@ -22,7 +25,7 @@ A collection of various tools for working with GPX (and related) files.
 
 - `--input`, `-i`: **Required**. The path to the input GPX file.
 - `--output`, `-o`: **Required**. The path to the output CSV file.
-- `--format`, `-f`: Allows you to specify a custom column mapping to use when generating the CSV file. See the *CSV Column Mapping* section for mor information.
+- `--format`, `-f`: Allows you to specify a custom column mapping to use when generating the CSV file. See the [CSV Column Mapping](#csv-column-mapping) section for mor information.
 
 ## CSV Column Mapping
 
