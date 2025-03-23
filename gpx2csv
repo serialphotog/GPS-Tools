@@ -62,6 +62,8 @@ def main():
         except ValueError as e:
             print(e)
             sys.exit()
+    else:
+        column_mapping = None
 
     # Parse the GPX file
     gpx_parser = GPXParser(gpx_path= args.gpx_path)
@@ -71,7 +73,7 @@ def main():
     # Generate the output CSV file
     csv_writer = CSVWriter(gps_points= gpx_parser.get_gps_points(),
                            output_path= args.csv_path,
-                           column_mapping= args.column_mapping)
+                           column_mapping= column_mapping)
     total = csv_writer.generate()
     print(f'Successfully generated CSV file with {total} waypoints.')
 

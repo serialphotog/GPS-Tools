@@ -60,11 +60,21 @@ class CSVWriter:
             name_col = self.column_mapping['name']
             desc_col = self.column_mapping['desc']
 
-        row = [None] * CSV_ROW_SIZE
+        # Determine how many elements the row will have
+        row_size = CSV_ROW_SIZE
+        if name_col == 'skip':
+            row_size -= 1
+        if desc_col == 'skip':
+            row_size -= 1
+        row = [None] * row_size
 
         row[lat_col] = point.latitude
         row[lon_col] = point.longitude
-        row[name_col] = point.name
-        row[desc_col] = point.description
+
+        if not name_col == 'skip':
+            row[name_col] = point.name
+
+        if not desc_col == 'skip':
+            row[desc_col] = point.description
 
         return row
