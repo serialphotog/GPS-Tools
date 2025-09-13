@@ -18,7 +18,8 @@ GPX_WAYPOINT_LAT: str = "lat"
 GPX_WAYPOINT_LON: str = "lon"
 GPX_WAYPOINT_DESC: str = "desc"
 GPX_WAYPOINT_NAME: str = "name"
-GPX_WAYPOINT: str = "gpx:wpt"
+GPX_NAMESPACED_WAYPOINT: str = "gpx:wpt"
+GPX_WAYPOINT: str = "wpt"
 
 class GPXParser:
 
@@ -49,8 +50,13 @@ class GPXParser:
         gpx_tree = ET.parse(self.gpx_path)
         root_elem = gpx_tree.getroot()
 
-        # Iterate over all of the waypoints
+        # Iterate over all of the namespaced waypoints
         total = 0
+        for waypoint in root_elem.findall(GPX_NAMESPACED_WAYPOINT, GPX_NAMESPACE):
+            total += 1
+            self._parse_waypoint(waypoint)
+
+        # Iterate over all of the non-namespaced waypoints
         for waypoint in root_elem.findall(GPX_WAYPOINT, GPX_NAMESPACE):
             total += 1
             self._parse_waypoint(waypoint)
