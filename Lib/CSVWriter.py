@@ -1,5 +1,6 @@
 import csv
 
+from pathlib import Path
 from typing import Dict
 
 # The size the pre-populated CSV row needs to be
@@ -30,7 +31,9 @@ class CSVWriter:
 
         :returns: The total number of waypoints added to the CSV file.
         """
-        with open(self.output_path, 'w') as csv_file:
+        out_path = Path(self.output_path)
+
+        with out_path.open("w", newline="", encoding="utf-8") as csv_file:
             csvwriter = csv.writer(csv_file)
             total = 0
             for point in self.gps_points:
