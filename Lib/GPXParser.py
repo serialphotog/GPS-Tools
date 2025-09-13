@@ -78,9 +78,9 @@ class GPXParser:
         name = None
         description = None
         for child in waypoint:
-            if child.tag == f'{CHILD_MATCHER}{GPX_WAYPOINT_NAME}':
+            if child.tag == f'{CHILD_MATCHER}{GPX_WAYPOINT_NAME}' or child.tag == GPX_WAYPOINT_NAME:
                 name = child.text
-            if child.tag == f'{CHILD_MATCHER}{GPX_WAYPOINT_DESC}':
+            if child.tag == f'{CHILD_MATCHER}{GPX_WAYPOINT_DESC}' or child.tag == GPX_WAYPOINT_DESC:
                 description = child.text
         
         gps_point = GPSPoint(
