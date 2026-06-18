@@ -7,7 +7,8 @@ GPX_ROOT_ELEM: str = 'gpx'
 GPX_HEADER_VALUES: Dict[str, str] = {
     'xmlns': 'http://www.topografix.com/GPX/1/1',
     'xmlns:gpxx': 'http://www.garmin.com/xmlschemas/GpxExtensions/v3',
-    'CREATOR': 'AdamThompsonPhoto.com',
+    'version': '1.1',
+    'creator': 'AdamThompsonPhoto.com',
 }
 GPX_WAYPOINT: str = 'wpt'
 GPX_WAYPOINT_NAME: str = "name"
@@ -51,9 +52,12 @@ class GPXWriter:
             self._build_waypoint(gpx_head, point)
 
         # Write the GPX file to disk
-        xml = ET.tostring(gpx_head)
-        with open(self.output_path, 'wb') as f:
-            f.write(xml)
+        gpx_tree = ET.ElementTree(gpx_head)
+        gpx_tree.write(
+            self.output_path,
+            encoding='utf-8',
+            xml_declaration=True
+        )
 
         return total
     
