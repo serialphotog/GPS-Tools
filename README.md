@@ -58,3 +58,13 @@ It's also worth mentioning that you can ignore either the *name* or *description
 ```
 -f lat:2,lon:3,name:0,desc:skip
 ```
+
+# Development Notes
+
+These are just various notes for anyone wanting to hack on this project.
+
+## Running Tests
+
+```bash
+python3 -m unittest discover -s tests
+```
