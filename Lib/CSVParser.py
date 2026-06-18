@@ -85,8 +85,14 @@ class CSVParser:
             desc_col = self.column_mapping['desc']
 
         # Check the coordinates
-        lat = row[lat_col]
-        lon = row[lon_col]
+        try:
+            lat = row[lat_col]
+            lon = row[lon_col]
+        except IndexError:
+            if self.verbose:
+                print(f'Missing coordinate column in row: {row}. Skipping entry.')
+            return False
+
         try:
             lat = float(lat)
             lon = float(lon)
@@ -96,15 +102,20 @@ class CSVParser:
             return False
         
         # Parse the name and description if they're not skipped
-        if not name_col == 'skip':
-            name = row[name_col]
-        else:
-            name = None
-        
-        if not desc_col == 'skip':
-            desc = row[desc_col]
-        else:
-            desc = None
+        try:
+            if not name_col == 'skip':
+                name = row[name_col]
+            else:
+                name = None
+            
+            if not desc_col == 'skip':
+                desc = row[desc_col]
+            else:
+                desc = None
+        except IndexError:
+            if self.verbose:
+                print(f'Missing name or description column in row: {row}. Skipping entry.')
+            return False
         
         # Build the GPS Point object
         point = GPSPoint(
