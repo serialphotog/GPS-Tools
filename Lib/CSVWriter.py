@@ -64,11 +64,13 @@ class CSVWriter:
             desc_col = self.column_mapping['desc']
 
         # Determine how many elements the row will have
-        row_size = CSV_ROW_SIZE
-        if name_col == 'skip':
-            row_size -= 1
-        if desc_col == 'skip':
-            row_size -= 1
+        mapped_columns = [lat_col, lon_col]
+        if not name_col == 'skip':
+            mapped_columns.append(name_col)
+        if not desc_col == 'skip':
+            mapped_columns.append(desc_col)
+
+        row_size = max(mapped_columns) + 1
         row = [None] * row_size
 
         row[lat_col] = point.latitude
