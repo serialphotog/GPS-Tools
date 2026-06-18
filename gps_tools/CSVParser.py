@@ -1,7 +1,7 @@
 import csv
 import os
 
-from Lib.GPSPoint import GPSPoint
+from gps_tools.GPSPoint import GPSPoint
 from typing import Dict, Tuple
 
 class CSVParser:

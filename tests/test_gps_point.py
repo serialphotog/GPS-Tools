@@ -1,6 +1,6 @@
 import unittest
 
-from Lib.GPSPoint import GPSPoint
+from gps_tools.GPSPoint import GPSPoint
 
 
 class GPSPointTests(unittest.TestCase):

@@ -1,6 +1,6 @@
 import unittest
 
-from Lib.CSVTools import process_column_mapping
+from gps_tools.CSVTools import process_column_mapping
 
 
 class ProcessColumnMappingTests(unittest.TestCase):

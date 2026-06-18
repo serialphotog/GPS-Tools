@@ -1,76 +1,9 @@
 #!/usr/bin/env python3
 
-import argparse
-import os
 import sys
 
-from Lib.CommandLine import prompt_user_for_yes_or_no
-from Lib.CSVTools import process_column_mapping
-from Lib.CSVWriter import CSVWriter
-from Lib.GPXParser import GPXParser
+from gps_tools.cli import gpx2csv_main
 
-def _validate_command_line_args(args) -> bool:
-    """
-    Validates all of the command line arguments.
-
-    :param args: The command line arguments to validate.
-
-    :returns: True if the arguments are valid, else False.
-    """
-    # Make sure the input GPX exists
-    if not os.path.isfile(args.gpx_path):
-        print(f'Could not find the input GPX: {args.gpx_path}')
-        return False
-    
-    # Check if the output file already exists
-    if os.path.isfile(args.csv_path) and not args.force:
-        try:
-            overwrite = prompt_user_for_yes_or_no(f'Output CSV {args.csv_path} ' \
-                                                  'already exists. Overwrite it?',
-                                                  'no')
-        except EOFError:
-            print(f'Output file exists. Use --force to overwrite {args.csv_path}.')
-            return False
-        if not overwrite:
-            print(f'Output file exists. Aborting.')
-            return False
-
-    return True
-
-def main() -> int:
-    parser = argparse.ArgumentParser(description="A simply utility to convert GPX files to CSV files.")
-    parser.add_argument('--input', '-i', dest="gpx_path", required=True, help="Path to the input GPX file.")
-    parser.add_argument('--output', '-o', dest="csv_path", required=True, help="Path to write the resulting CSV file to.")
-    parser.add_argument('--format', '-f', dest="column_mapping", help="The column mapping to use in the resulting CSV file.")
-    parser.add_argument('--force', dest="force", action="store_true", help="Overwrite the output file if it already exists.")
-    args = parser.parse_args()
-
-    # Validate the command line arguments
-    if not _validate_command_line_args(args=args):
-        return 1
-
-    # Handle the column mapping format string, if supplied
-    if args.column_mapping:
-        try:
-            column_mapping = process_column_mapping(args.column_mapping)
-        except ValueError as e:
-            print(e)
-            return 1
-    else:
-        column_mapping = None
-
-    # Parse the GPX file
-    gpx_parser = GPXParser(gpx_path= args.gpx_path)
-    total = gpx_parser.parse()
-    print(f'Successfully parsed {total} waypoints.')
-
-    # Generate the output CSV file
-    csv_writer = CSVWriter(gps_points= gpx_parser.get_gps_points(),
-                           output_path= args.csv_path,
-                           column_mapping= column_mapping)
-    total = csv_writer.generate()
-    print(f'Successfully generated CSV file with {total} waypoints.')
-    return 0
 
 if __name__ == '__main__':
-    sys.exit(main())
+    sys.exit(gpx2csv_main())

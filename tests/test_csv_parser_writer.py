@@ -3,9 +3,9 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from Lib.CSVParser import CSVParser
-from Lib.CSVWriter import CSVWriter
-from Lib.GPSPoint import GPSPoint
+from gps_tools.CSVParser import CSVParser
+from gps_tools.CSVWriter import CSVWriter
+from gps_tools.GPSPoint import GPSPoint
 
 
 class CSVParserTests(unittest.TestCase):

@@ -2,7 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from Lib.GPXParser import GPXParser
+from gps_tools.GPXParser import GPXParser
 
 
 class GPXParserTests(unittest.TestCase):

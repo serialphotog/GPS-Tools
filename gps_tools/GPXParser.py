@@ -1,7 +1,7 @@
 import os
 import xml.etree.ElementTree as ET
 
-from Lib.GPSPoint import GPSPoint
+from gps_tools.GPSPoint import GPSPoint
 from typing import Dict
 
 # The GPX namespace value

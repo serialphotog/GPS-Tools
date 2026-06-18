@@ -3,8 +3,8 @@ import unittest
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-from Lib.GPSPoint import GPSPoint
-from Lib.GPXWriter import GPXWriter
+from gps_tools.GPSPoint import GPSPoint
+from gps_tools.GPXWriter import GPXWriter
 
 
 class GPXWriterTests(unittest.TestCase):
