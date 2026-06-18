@@ -18,8 +18,8 @@ class GPXParserTests(unittest.TestCase):
         points = self._parse_points(gpx)
 
         self.assertEqual(len(points), 1)
-        self.assertEqual(points[0].latitude, '40.1')
-        self.assertEqual(points[0].longitude, '-105.2')
+        self.assertEqual(points[0].latitude, 40.1)
+        self.assertEqual(points[0].longitude, -105.2)
         self.assertEqual(points[0].name, 'Peak')
         self.assertEqual(points[0].description, 'Trail')
 

@@ -71,8 +71,8 @@ class GPXParser:
         :param waypoint: The waypoint to parse.
         """
         # Extract the coordinates from the waypoint
-        latitude = waypoint.attrib[GPX_WAYPOINT_LAT]
-        longitude = waypoint.attrib[GPX_WAYPOINT_LON]
+        latitude = float(waypoint.attrib[GPX_WAYPOINT_LAT])
+        longitude = float(waypoint.attrib[GPX_WAYPOINT_LON])
 
         # Parse the children
         name = None
