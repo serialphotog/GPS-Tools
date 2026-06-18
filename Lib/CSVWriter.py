@@ -1,4 +1,6 @@
 import csv
+import os
+import tempfile
 
 from pathlib import Path
 from typing import Dict
@@ -32,18 +34,34 @@ class CSVWriter:
         :returns: The total number of waypoints added to the CSV file.
         """
         out_path = Path(self.output_path)
+        temp_file = tempfile.NamedTemporaryFile(
+            'w',
+            newline='',
+            encoding='utf-8',
+            dir=out_path.parent,
+            prefix=f'.{out_path.name}.',
+            suffix='.tmp',
+            delete=False
+        )
+        temp_path = temp_file.name
 
-        with out_path.open("w", newline="", encoding="utf-8") as csv_file:
-            csvwriter = csv.writer(csv_file)
-            total = 0
-            for point in self.gps_points:
-                # Build the row to write in the correct order
-                row = self._build_csv_row(point=point)
+        try:
+            with temp_file as csv_file:
+                csvwriter = csv.writer(csv_file)
+                total = 0
+                for point in self.gps_points:
+                    # Build the row to write in the correct order
+                    row = self._build_csv_row(point=point)
 
-                csvwriter.writerow(row)
-                total += 1
+                    csvwriter.writerow(row)
+                    total += 1
 
-        return total
+            os.replace(temp_path, out_path)
+            return total
+        except Exception:
+            if os.path.exists(temp_path):
+                os.unlink(temp_path)
+            raise
     
     def _build_csv_row(self, point):
         """

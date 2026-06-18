@@ -1,5 +1,8 @@
+import os
+import tempfile
 import xml.etree.ElementTree as ET
 
+from pathlib import Path
 from typing import Dict
 
 # Various constant values for generating GPX files
@@ -52,12 +55,30 @@ class GPXWriter:
             self._build_waypoint(gpx_head, point)
 
         # Write the GPX file to disk
-        gpx_tree = ET.ElementTree(gpx_head)
-        gpx_tree.write(
-            self.output_path,
-            encoding='utf-8',
-            xml_declaration=True
+        out_path = Path(self.output_path)
+        temp_file = tempfile.NamedTemporaryFile(
+            'wb',
+            dir=out_path.parent,
+            prefix=f'.{out_path.name}.',
+            suffix='.tmp',
+            delete=False
         )
+        temp_path = temp_file.name
+
+        gpx_tree = ET.ElementTree(gpx_head)
+        try:
+            with temp_file as gpx_file:
+                gpx_tree.write(
+                    gpx_file,
+                    encoding='utf-8',
+                    xml_declaration=True
+                )
+
+            os.replace(temp_path, out_path)
+        except Exception:
+            if os.path.exists(temp_path):
+                os.unlink(temp_path)
+            raise
 
         return total
     
