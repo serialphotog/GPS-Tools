@@ -217,7 +217,7 @@ class CLIRoundTripTests(unittest.TestCase):
         self.assertNotIn('Traceback', result.stderr)
         self.assertFalse(output_exists)
 
-    def test_gpx2csv_reports_missing_waypoint_coordinates_without_traceback(self):
+    def test_gpx2csv_skips_missing_waypoint_coordinates_without_traceback(self):
         with tempfile.TemporaryDirectory() as tmp:
             tmp_path = Path(tmp)
             input_gpx = tmp_path / 'input.gpx'
@@ -241,13 +241,16 @@ class CLIRoundTripTests(unittest.TestCase):
                 cwd=ROOT
             )
             output_exists = output_csv.exists()
+            with output_csv.open(newline='', encoding='utf-8') as csv_file:
+                rows = list(csv.reader(csv_file))
 
-        self.assertEqual(result.returncode, 1)
-        self.assertIn('Invalid GPX waypoint: missing lat attribute.', result.stdout)
+        self.assertEqual(result.returncode, 0)
+        self.assertIn('1 waypoints had errors and were skipped.', result.stdout)
         self.assertNotIn('Traceback', result.stderr)
-        self.assertFalse(output_exists)
+        self.assertTrue(output_exists)
+        self.assertEqual(rows, [])
 
-    def test_gpx2csv_reports_invalid_waypoint_coordinates_without_traceback(self):
+    def test_gpx2csv_skips_invalid_waypoint_coordinates_without_traceback(self):
         with tempfile.TemporaryDirectory() as tmp:
             tmp_path = Path(tmp)
             input_gpx = tmp_path / 'input.gpx'
@@ -273,11 +276,14 @@ class CLIRoundTripTests(unittest.TestCase):
                 cwd=ROOT
             )
             output_exists = output_csv.exists()
+            with output_csv.open(newline='', encoding='utf-8') as csv_file:
+                rows = list(csv.reader(csv_file))
 
-        self.assertEqual(result.returncode, 1)
-        self.assertIn('Invalid GPX waypoint coordinate:', result.stdout)
+        self.assertEqual(result.returncode, 0)
+        self.assertIn('1 waypoints had errors and were skipped.', result.stdout)
         self.assertNotIn('Traceback', result.stderr)
-        self.assertFalse(output_exists)
+        self.assertTrue(output_exists)
+        self.assertEqual(rows, [])
 
 
 if __name__ == '__main__':

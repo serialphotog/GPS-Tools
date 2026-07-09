@@ -35,7 +35,7 @@ class GPXParserTests(unittest.TestCase):
         self.assertEqual(len(points), 1)
         self.assertEqual(points[0].name, 'Peak')
 
-    def test_missing_waypoint_coordinates_raise_key_error(self):
+    def test_skips_waypoints_with_missing_coordinates(self):
         gpx = '<gpx><wpt><name>Peak</name></wpt></gpx>'
 
         with tempfile.TemporaryDirectory() as tmp:
@@ -43,8 +43,32 @@ class GPXParserTests(unittest.TestCase):
             gpx_path.write_text(gpx, encoding='utf-8')
 
             parser = GPXParser(str(gpx_path))
-            with self.assertRaises(KeyError):
-                parser.parse()
+            total, errors = parser.parse()
+
+        self.assertEqual(total, 1)
+        self.assertEqual(errors, 1)
+        self.assertEqual(parser.get_gps_points(), [])
+
+    def test_skips_invalid_waypoints_and_keeps_valid_ones(self):
+        gpx = (
+            '<gpx>'
+            '<wpt lat="north" lon="-105.2"><name>Bad</name></wpt>'
+            '<wpt lat="40.1" lon="-105.2"><name>Peak</name></wpt>'
+            '</gpx>'
+        )
+
+        with tempfile.TemporaryDirectory() as tmp:
+            gpx_path = Path(tmp) / 'points.gpx'
+            gpx_path.write_text(gpx, encoding='utf-8')
+
+            parser = GPXParser(str(gpx_path))
+            total, errors = parser.parse()
+
+        points = parser.get_gps_points()
+        self.assertEqual(total, 2)
+        self.assertEqual(errors, 1)
+        self.assertEqual(len(points), 1)
+        self.assertEqual(points[0].name, 'Peak')
 
     def _parse_points(self, gpx):
         with tempfile.TemporaryDirectory() as tmp:
@@ -52,9 +76,10 @@ class GPXParserTests(unittest.TestCase):
             gpx_path.write_text(gpx, encoding='utf-8')
 
             parser = GPXParser(str(gpx_path))
-            total = parser.parse()
+            total, errors = parser.parse()
 
         self.assertEqual(total, 1)
+        self.assertEqual(errors, 0)
         return parser.get_gps_points()
 
 

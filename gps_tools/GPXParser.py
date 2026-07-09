@@ -2,7 +2,7 @@ import os
 import xml.etree.ElementTree as ET
 
 from gps_tools.GPSPoint import GPSPoint
-from typing import Dict
+from typing import Dict, Tuple
 
 # The GPX namespace value
 NAMESPACE: str = 'http://www.topografix.com/GPX/1/1'
@@ -38,11 +38,12 @@ class GPXParser:
         self.gpx_path = gpx_path
         self.gps_points = []
 
-    def parse(self) -> int:
+    def parse(self) -> Tuple[int, int]:
         """
         Processes the GPX file, extracting the valid GPS points.
 
-        :returns: The total number of GPS points loaded from the GPX file.
+        :returns: A tuple containing the total processed waypoints and the
+                  waypoints containing errors, respectively.
         """
         print(f'Parsing {self.gpx_path}')
 
@@ -52,16 +53,35 @@ class GPXParser:
 
         # Iterate over all of the namespaced waypoints
         total = 0
+        errors = 0
         for waypoint in root_elem.findall(GPX_NAMESPACED_WAYPOINT, GPX_NAMESPACE):
             total += 1
-            self._parse_waypoint(waypoint)
+            if not self._process_waypoint(waypoint):
+                errors += 1
 
         # Iterate over all of the non-namespaced waypoints
         for waypoint in root_elem.findall(GPX_WAYPOINT, GPX_NAMESPACE):
             total += 1
-            self._parse_waypoint(waypoint)
+            if not self._process_waypoint(waypoint):
+                errors += 1
 
-        return total
+        return (total, errors)
+
+    def _process_waypoint(self, waypoint) -> bool:
+        """
+        Parses an individual waypoint, skipping invalid entries.
+
+        :param waypoint: The waypoint to parse.
+
+        :returns: True if the waypoint was valid and successfully parsed, else
+                  False.
+        """
+        try:
+            self._parse_waypoint(waypoint)
+        except (KeyError, ValueError):
+            return False
+
+        return True
     
     def _parse_waypoint(self, waypoint):
         """
