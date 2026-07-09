@@ -190,6 +190,95 @@ class CLIRoundTripTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0)
         self.assertEqual(rows, [['40.1', '-105.2', 'Peak', 'Trail']])
 
+    def test_gpx2csv_reports_malformed_gpx_without_traceback(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            input_gpx = tmp_path / 'input.gpx'
+            output_csv = tmp_path / 'output.csv'
+            input_gpx.write_text('<gpx><wpt></gpx>', encoding='utf-8')
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(ROOT / 'gpx2csv'),
+                    '-i',
+                    str(input_gpx),
+                    '-o',
+                    str(output_csv),
+                ],
+                capture_output=True,
+                text=True,
+                cwd=ROOT
+            )
+            output_exists = output_csv.exists()
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn('Could not parse GPX file:', result.stdout)
+        self.assertNotIn('Traceback', result.stderr)
+        self.assertFalse(output_exists)
+
+    def test_gpx2csv_reports_missing_waypoint_coordinates_without_traceback(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            input_gpx = tmp_path / 'input.gpx'
+            output_csv = tmp_path / 'output.csv'
+            input_gpx.write_text(
+                '<gpx><wpt><name>Peak</name></wpt></gpx>',
+                encoding='utf-8'
+            )
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(ROOT / 'gpx2csv'),
+                    '-i',
+                    str(input_gpx),
+                    '-o',
+                    str(output_csv),
+                ],
+                capture_output=True,
+                text=True,
+                cwd=ROOT
+            )
+            output_exists = output_csv.exists()
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn('Invalid GPX waypoint: missing lat attribute.', result.stdout)
+        self.assertNotIn('Traceback', result.stderr)
+        self.assertFalse(output_exists)
+
+    def test_gpx2csv_reports_invalid_waypoint_coordinates_without_traceback(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            input_gpx = tmp_path / 'input.gpx'
+            output_csv = tmp_path / 'output.csv'
+            input_gpx.write_text(
+                '<gpx><wpt lat="north" lon="-105.2">'
+                '<name>Peak</name><desc>Trail</desc>'
+                '</wpt></gpx>',
+                encoding='utf-8'
+            )
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(ROOT / 'gpx2csv'),
+                    '-i',
+                    str(input_gpx),
+                    '-o',
+                    str(output_csv),
+                ],
+                capture_output=True,
+                text=True,
+                cwd=ROOT
+            )
+            output_exists = output_csv.exists()
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn('Invalid GPX waypoint coordinate:', result.stdout)
+        self.assertNotIn('Traceback', result.stderr)
+        self.assertFalse(output_exists)
+
 
 if __name__ == '__main__':
     unittest.main()

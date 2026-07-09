@@ -1,5 +1,6 @@
 import argparse
 import os
+import xml.etree.ElementTree as ET
 
 from gps_tools.CommandLine import prompt_user_for_yes_or_no
 from gps_tools.CSVParser import CSVParser
@@ -121,7 +122,18 @@ def gpx2csv_main() -> int:
         column_mapping = None
 
     gpx_parser = GPXParser(gpx_path=args.gpx_path)
-    total = gpx_parser.parse()
+    try:
+        total = gpx_parser.parse()
+    except ET.ParseError as e:
+        print(f'Could not parse GPX file: {e}')
+        return 1
+    except KeyError as e:
+        attribute = e.args[0] if e.args else 'required'
+        print(f'Invalid GPX waypoint: missing {attribute} attribute.')
+        return 1
+    except ValueError as e:
+        print(f'Invalid GPX waypoint coordinate: {e}')
+        return 1
     print(f'Successfully parsed {total} waypoints.')
 
     csv_writer = CSVWriter(gps_points=gpx_parser.get_gps_points(),
